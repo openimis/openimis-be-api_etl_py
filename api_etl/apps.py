@@ -1,5 +1,7 @@
 from django.apps import AppConfig
 
+MODULE_NAME = "api_etl"
+
 DEFAULT_CONFIG = {
     "auth_type": "basic",  # noauth, basic, bearer
     "auth_basic_username": "",  # basic auth username
@@ -13,13 +15,15 @@ DEFAULT_CONFIG = {
 
     "adapter_first_name_field": "firstName",
     "adapter_last_name_field": "lastName",
-    "adapter_dob_field": "dateOfBirth"
+    "adapter_dob_field": "dateOfBirth",
+
+    "skip_integration_test": True,
 }
 
 
 class ApiEtlConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'api_etl'
+    name = MODULE_NAME
 
     auth_type = None
     auth_basic_username = None
@@ -34,6 +38,8 @@ class ApiEtlConfig(AppConfig):
     adapter_first_name_field = None
     adapter_last_name_field = None
     adapter_dob_field = None
+
+    skip_integration_test = None
 
     @classmethod
     def _load_config(cls, cfg):
