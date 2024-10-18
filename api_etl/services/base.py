@@ -28,19 +28,19 @@ class ETLService(metaclass=abc.ABCMeta):
         try:
             raw_data = self.source.pull()
         except self.source.Error as e:
-            logger.error("Error while pulling data from source: ", str(e), exc_info=e)
+            logger.error("Error while pulling data from source: %s", str(e), exc_info=e)
             return self._error_result(str(e))
 
         try:
             transformed_data = self.adapter.transform(raw_data)
         except self.adapter.Error as e:
-            logger.error("Error while transforming data: ", str(e), exc_info=e)
+            logger.error("Error while transforming data: %s", str(e), exc_info=e)
             return self._error_result(str(e))
 
         try:
             self.sink.push(transformed_data)
         except self.sink.Error as e:
-            logger.error("Error while pushing data to sink: ", str(e), exc_info=e)
+            logger.error("Error while pushing data to sink: %s", str(e), exc_info=e)
             return self._error_result(str(e))
 
         return self._success_result()

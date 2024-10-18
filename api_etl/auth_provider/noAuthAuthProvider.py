@@ -5,4 +5,6 @@ class NoAuthProvider(AuthProvider):
     """
     Implementation of AuthProvider Interface that does not provide any authorization
     """
-    pass
+
+    def get_auth_header(self) -> dict[str, str]:
+        return {}

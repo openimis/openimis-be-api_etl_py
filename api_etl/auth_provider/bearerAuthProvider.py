@@ -7,8 +7,7 @@ class BearerAuthProvider(AuthProvider):
     Auth provider that add bearer token authorization header for the request
     """
 
-    @staticmethod
-    def get_auth_header():
+    def get_auth_header(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {BearerAuthProvider._get_token_value()}"}
 
     @staticmethod
@@ -16,4 +15,3 @@ class BearerAuthProvider(AuthProvider):
         if not ApiEtlConfig.auth_bearer_token:
             raise AuthError("Bearer token not provided")
         return ApiEtlConfig.auth_bearer_token
-
