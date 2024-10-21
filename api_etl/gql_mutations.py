@@ -17,6 +17,8 @@ class ETLServiceMutation(BaseMutation):
     """
     Mutation to execute the ETLService
     """
+    _mutation_class = "ETLServiceMutation"
+    _mutation_module = "api_etl"
 
     class Input(OpenIMISMutation.Input):
         name_of_service = graphene.String(required=True)

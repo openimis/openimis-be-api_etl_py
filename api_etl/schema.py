@@ -32,7 +32,7 @@ class Query(graphene.ObjectType):
             if class_service:
                 list_sr.append(
                     ETLServicesGQLType(
-                        name_of_service=class_service,
+                        name_of_service=class_service.__name__,
                     )
                 )
         else:
@@ -41,7 +41,7 @@ class Query(graphene.ObjectType):
             for class_service in class_service_list:
                 list_sr.append(
                     ETLServicesGQLType(
-                        calculation_class_name=class_service,
+                        name_of_service=class_service,
                     )
                 )
         return ETLServicesListGQLType(list_sr)
