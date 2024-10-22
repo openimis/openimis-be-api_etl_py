@@ -18,6 +18,8 @@ DEFAULT_CONFIG = {
     "adapter_dob_field": "dateOfBirth",
 
     "skip_integration_test": True,
+    "gql_query_api_etl_rule_perms": ["953001"],
+    "gql_mutation_execute_api_etl_rule_perms": ["953002"],
 }
 
 
@@ -40,6 +42,8 @@ class ApiEtlConfig(AppConfig):
     adapter_dob_field = None
 
     skip_integration_test = None
+    gql_query_api_etl_rule_perms = None
+    gql_mutation_execute_api_etl_rule_perms = None
 
     @classmethod
     def _load_config(cls, cfg):
@@ -52,6 +56,5 @@ class ApiEtlConfig(AppConfig):
 
     def ready(self):
         from core.models import ModuleConfiguration
-
         cfg = ModuleConfiguration.get_or_default(self.name, DEFAULT_CONFIG)
         self._load_config(cfg)
