@@ -32,14 +32,11 @@ def get_classes_in_module(module_name):
 
     # Get all members of the module (classes, functions, variables, etc.)
     members = inspect.getmembers(module, inspect.isclass)
-    print(members)
+
     # Filter to only include classes that are defined in this module (i.e., exclude imported classes)
     classes_in_module = [
         cls_name for cls_name, cls_obj in members
         if module_name in cls_obj.__module__ and 'api_etl.services.base' not in cls_obj.__module__
     ]
-
-    # Print the filtered class names
-    print(classes_in_module)
 
     return classes_in_module
