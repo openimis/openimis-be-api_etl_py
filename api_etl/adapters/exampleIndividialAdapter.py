@@ -16,16 +16,12 @@ class ExampleIndividualAdapter(DataAdapter):
         """
         result = []
 
-        for page in data:
-            if not "rows" in page:
-                raise self.Error("Invalid input, rows field required")
-
-            for row in page["rows"]:
-                row.pop("id", None)
-                result_row = {"first_name": row.pop(ApiEtlConfig.adapter_first_name_field) or "empty",
-                              "last_name": row.pop(ApiEtlConfig.adapter_last_name_field) or "empty",
-                              "dob": row.pop(ApiEtlConfig.adapter_dob_field) or "1970-01-01",
-                              "json_ext": row}
-                result.append(result_row)
+        for row in data:
+            row.pop("id", None)
+            result_row = {"first_name": row.pop(ApiEtlConfig.adapter_first_name_field) or "empty",
+                          "last_name": row.pop(ApiEtlConfig.adapter_last_name_field) or "empty",
+                          "dob": row.pop(ApiEtlConfig.adapter_dob_field) or "1970-01-01",
+                          "json_ext": row}
+            result.append(result_row)
 
         return result
