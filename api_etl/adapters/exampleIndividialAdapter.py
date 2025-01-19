@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Iterable
 
 from api_etl.adapters.base import DataAdapter
 from api_etl.apps import ApiEtlConfig
@@ -9,12 +9,15 @@ class ExampleIndividualAdapter(DataAdapter):
     Adapter allowing data transformation form ExampleIndividualSource to IndividualService input
     """
 
-    def transform(self, data: Any) -> Any:
+    def transform(self, data: Iterable[Any]) -> Iterable[Any]:
         """
         Transform paginated result of the ExampleIndividualSource
         Input data is assumed to be Iterable of pages from the example API
         """
         result = []
+
+        if data is None:
+            raise self.Error(f"Invalid input, expect input not to be None")
 
         for row in data:
             row.pop("id", None)
