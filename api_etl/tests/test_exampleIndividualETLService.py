@@ -35,6 +35,7 @@ class ETLServiceTestCase(TestCase):
 
     @patch("requests.Session.request")
     @patch("api_etl.apps.ApiEtlConfig.source_batch_size", new=2)
+    @patch('individual.services.IndividualConfig.enable_maker_checker_for_individual_upload', False)
     def test_example_individual_etl_service(self, mock_request):
         mock_request.side_effect = [
             MagicMock(

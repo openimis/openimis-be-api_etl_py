@@ -14,7 +14,7 @@ class HistoryModelServiceSink(DataSink):
         self.service = service
         self.rollback_on_fail = rollback_on_fail
 
-    def push(self, data: list[dict]):
+    def push(self, data: list[dict], identifier = None):
         """
         Push data to the create() method of the provided service
         The data format is expected do be an iterable of valid service.create() inputs.
