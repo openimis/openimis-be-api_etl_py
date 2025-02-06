@@ -18,7 +18,7 @@ class TestIndividualImportSink(TestCase):
             first_name='John',
             last_name='Doe',
             dob='1990-01-01',
-            json_ext={'external_id': '123'},
+            json_ext={'external_id': 123},
         )
         self.individual.save(username=self.user.username)
 
@@ -78,8 +78,8 @@ class TestIndividualImportSink(TestCase):
 
         sink = IndividualImportSink(self.user)
         data = [
-            {'external_id': '123', 'name': 'John Doe', 'age': 30},  # Existing record
-            {'external_id': '456', 'name': 'Jane Smith', 'age': 25}  # New record
+            {'external_id': 123, 'name': 'John Doe', 'age': 30},  # Existing record
+            {'external_id': 456, 'name': 'Jane Smith', 'age': 25}  # New record
         ]
 
         sink.push(data)
@@ -111,8 +111,8 @@ class TestIndividualImportSink(TestCase):
 
         sink = IndividualImportSink(self.user)
         data = [
-            {'external_id': '123', 'name': 'John Doe', 'age': 30},  # Existing record
-            {'external_id': '456', 'name': 'Jane Smith', 'age': 25}  # New record
+            {'external_id': 123, 'name': 'John Doe', 'age': 30},  # Existing record
+            {'external_id': 456, 'name': 'Jane Smith', 'age': 25}  # New record
         ]
 
         sink.push(data)

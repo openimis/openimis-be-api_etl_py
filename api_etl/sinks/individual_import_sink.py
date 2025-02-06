@@ -71,7 +71,7 @@ class IndividualImportSink(DataSink):
 
         return existing_records, new_records
 
-    def _get_existing_individual_ids(self, data_ids: list[str], model_lookup_field: str) -> dict:
+    def _get_existing_individual_ids(self, data_ids: list, model_lookup_field: str) -> dict:
         filter_kwargs = {f"{model_lookup_field}__in": data_ids}
         queryset = Individual.objects.filter(**filter_kwargs)
 
