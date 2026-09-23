@@ -4,11 +4,11 @@ from core.rights_declaration import RightsDeclaration
 
 MODULE_NAME = "api_etl"
 
-# Droits, par entite puis par action. Le module n'a pas de modele : `apiEtlRule` designe
-# une regle ETL, c'est-a-dire une classe de service decouverte dans `api_etl.services`.
-# `execute` est une action metier et non un `update` : declencher un pipeline ETL ecrit
-# dans d'autres modules (insuree, individual...) sans modifier la regle elle-meme.
-# Le nom django reste declaratif tant qu'aucun modele ne porte `Meta.permissions`.
+# Rights, by entity then by action. The module has no model: `apiEtlRule` denotes an
+# ETL rule, that is, a service class discovered in `api_etl.services`. `execute` is a
+# business action and not an `update`: triggering an ETL pipeline writes into other
+# modules (insuree, individual...) without modifying the rule itself. The django name
+# stays declarative as long as no model carries `Meta.permissions`.
 DJANGO_PERMS = {
     "apiEtlRule": {
         "query": ("api_etl.view_apietlrule", 953001),
@@ -18,9 +18,9 @@ DJANGO_PERMS = {
 
 _PERM_CFG = {
     "gql_query_api_etl_rule_perms": ("apiEtlRule", "query"),
-    # Droit dormant : declare mais lu nulle part. La mutation qui execute un pipeline
-    # controle aujourd'hui le droit de lecture (953001) et non celui-ci. La separation
-    # est posee ici ; corriger le site d'appel est un autre lot.
+    # Dormant right: declared but read nowhere. The mutation that executes a pipeline
+    # checks the read right (953001) today and not this one. The separation is laid
+    # down here; fixing the call site is another batch of work.
     "gql_mutation_execute_api_etl_rule_perms": ("apiEtlRule", "execute"),
 }
 
@@ -78,9 +78,9 @@ class ApiEtlConfig(AppConfig):
     sink_model_lookup_field = None
     sink_update_existing = None
 
-    # Droits: constantes, plus surchargeables. Ils ne passent plus par le
-    # DEFAULT_CFG ni par ready(): `ModuleConfiguration.get_or_default` ignore
-    # desormais toute cle `_perms` stockee en base.
+    # Rights: constants, no longer overridable. They go neither through DEFAULT_CFG
+    # nor through ready(): `ModuleConfiguration.get_or_default` now ignores any
+    # `_perms` key stored in the database.
     gql_query_api_etl_rule_perms = RIGHTS.perms("apiEtlRule", "query")
     gql_mutation_execute_api_etl_rule_perms = RIGHTS.perms("apiEtlRule", "execute")
 

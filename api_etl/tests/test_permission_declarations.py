@@ -1,17 +1,17 @@
 """
-Garde-fous sur la declaration des droits d'api_etl.
+Guard rails on api_etl's rights declaration.
 
-Meme structure que `claim` et `core` : `DJANGO_PERMS` par entite puis par action, et
-`_PERM_CFG` qui en derive les cles de config. La particularite d'api_etl est qu'il n'a
-aucun modele : `apiEtlRule` designe une classe de service decouverte dynamiquement dans
-`api_etl.services`, il n'y a donc pas de point d'acces `Model.get_rights` a verrouiller.
+Same structure as `claim` and `core`: `DJANGO_PERMS` by entity then by action, and
+`_PERM_CFG` deriving the config keys from it. What is particular to api_etl is that it
+has no model at all: `apiEtlRule` denotes a service class discovered dynamically in
+`api_etl.services`, so there is no `Model.get_rights` access point to lock down.
 
-Ce qui est verrouille ici :
-  * les identifiants 953001/953002, tels que deployes et tels que les porte
-    `permissions_map.json` - en changer un retire l'acces aux roles qui le detiennent ;
-  * une cle de config sans attribut de classe n'est jamais chargee par `_load_config`
-    et sa lecture leve AttributeError - le droit devient inapplicable ;
-  * `has_perms([])` renvoie True, donc une liste vide accorde a tous.
+What is locked down here:
+  * the identifiers 953001/953002, as deployed and as `permissions_map.json` carries
+    them - changing one withdraws access from the roles that hold it;
+  * a config key with no class attribute is never loaded by `_load_config` and reading
+    it raises AttributeError - the right becomes unenforceable;
+  * `has_perms([])` returns True, so an empty list grants to everybody.
 """
 
 import json
@@ -28,14 +28,14 @@ from api_etl.apps import (
     perms,
 )
 
-# Les identifiants tels que deployes. En changer un est incompatible avec les roles
-# existants : il faut mettre ce test a jour *et* accorder le nouveau droit.
+# The identifiers as deployed. Changing one is incompatible with the existing roles:
+# this test has to be updated *and* the new right granted.
 EXPECTED_RIGHTS = {
     "gql_query_api_etl_rule_perms": ["953001"],
     "gql_mutation_execute_api_etl_rule_perms": ["953002"],
 }
 
-# Les cles de `permissions_map.json` qui portent ces memes identifiants.
+# The `permissions_map.json` keys that carry these same identifiers.
 EXPECTED_MAP_ENTRIES = {
     "api_etl.api_etl_rule": "953001",
     "api_etl.execute_api_etl_rule": "953002",
@@ -43,7 +43,7 @@ EXPECTED_MAP_ENTRIES = {
 
 
 def _load_permissions_map():
-    """`permissions_map.json` vit dans l'assemblage, pas dans le paquet."""
+    """`permissions_map.json` lives in the assembly, not in the package."""
     from django.conf import settings
 
     candidates = [
@@ -73,7 +73,7 @@ class ApiEtlPermissionDeclarationTestCase(TestCase):
         self.assertEqual(set(_PERM_CFG.values()), declared)
 
     def test_perm_cfg_matches_config_attributes(self):
-        """`_load_config` ignore les cles sans attribut de classe."""
+        """`_load_config` ignores the keys with no class attribute."""
         missing = [key for key in _PERM_CFG if not hasattr(ApiEtlConfig, key)]
         self.assertEqual(missing, [])
 
@@ -83,8 +83,8 @@ class ApiEtlPermissionDeclarationTestCase(TestCase):
 
     def test_attributes_carry_the_declared_right(self):
         """
-        Les droits sont des constantes posees depuis DJANGO_PERMS : l'attribut doit
-        valoir la declaration, sans passer par la config.
+        The rights are constants set from DJANGO_PERMS: the attribute must equal the
+        declaration, without going through the config.
         """
         for key, (entity, action) in _PERM_CFG.items():
             with self.subTest(key=key):
@@ -92,16 +92,16 @@ class ApiEtlPermissionDeclarationTestCase(TestCase):
 
     def test_query_and_execute_are_distinct_rights(self):
         """
-        La lecture d'une regle ETL et son execution ne sont pas le meme droit. Le site
-        d'appel de la mutation controle encore 953001 (faille connue, autre lot) ; la
-        declaration, elle, doit garder les deux separes.
+        Reading an ETL rule and executing it are not the same right. The mutation's
+        call site still checks 953001 (a known hole, another batch of work); the
+        declaration itself must keep the two separate.
         """
         self.assertNotEqual(
             perms("apiEtlRule", "query"), perms("apiEtlRule", "execute")
         )
 
     def test_no_shared_right_ids(self):
-        """Aucun partage d'identifiant n'est prevu dans ce module."""
+        """No identifier sharing is intended in this module."""
         seen = {}
         for entity, actions in DJANGO_PERMS.items():
             for action, (_, right_id) in actions.items():
@@ -118,7 +118,7 @@ class ApiEtlPermissionDeclarationTestCase(TestCase):
         self.assertEqual(shared, {})
 
     def test_django_permission_names_use_the_app_label(self):
-        """L'app_label dans cet assemblage est `api_etl`, pas le nom du paquet pip."""
+        """The app_label in this assembly is `api_etl`, not the pip package name."""
         for entity, actions in DJANGO_PERMS.items():
             for action, (name, _) in actions.items():
                 with self.subTest(entity=entity, action=action):
@@ -134,8 +134,8 @@ class ApiEtlPermissionDeclarationTestCase(TestCase):
 
     def test_configured_reads_the_configured_value_not_the_declared_default(self):
         """
-        ModuleConfiguration peut surcharger un droit ; un controle doit lire la valeur
-        configuree, la ou `perms()` renvoie le defaut declare.
+        ModuleConfiguration may override a right; a check must read the configured
+        value, where `perms()` returns the declared default.
         """
         original = ApiEtlConfig.gql_query_api_etl_rule_perms
         try:
@@ -146,14 +146,14 @@ class ApiEtlPermissionDeclarationTestCase(TestCase):
             ApiEtlConfig.gql_query_api_etl_rule_perms = original
 
     def test_configured_returns_none_for_an_undeclared_action(self):
-        """None signifie "aucune regle" : l'appelant doit echouer ferme."""
+        """None means "no rule": the caller must fail closed."""
         self.assertIsNone(configured_perms("apiEtlRule", "nosuchaction"))
 
     def test_ids_match_permissions_map(self):
-        """La carte des droits de l'assemblage doit porter les memes entiers."""
+        """The assembly's rights map must carry the same integers."""
         mapping = _load_permissions_map()
         if mapping is None:
-            self.skipTest("permissions_map.json introuvable dans cet assemblage")
+            self.skipTest("permissions_map.json not found in this assembly")
         for key, right_id in EXPECTED_MAP_ENTRIES.items():
             with self.subTest(key=key):
                 self.assertEqual(str(mapping.get(key)), right_id)
