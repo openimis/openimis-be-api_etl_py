@@ -1,6 +1,36 @@
 from django.apps import AppConfig
 
+from core.rights_declaration import RightsDeclaration
+
 MODULE_NAME = "api_etl"
+
+# Rights, by entity then by action. The module has no model: `apiEtlRule` denotes an
+# ETL rule, that is, a service class discovered in `api_etl.services`. `execute` is a
+# business action and not an `update`: triggering an ETL pipeline writes into other
+# modules (insuree, individual...) without modifying the rule itself. The django name
+# stays declarative as long as no model carries `Meta.permissions`.
+DJANGO_PERMS = {
+    "apiEtlRule": {
+        "query": ("api_etl.view_apietlrule", 953001),
+        "execute": ("api_etl.execute_apietlrule", 953002),
+    },
+}
+
+_PERM_CFG = {
+    "gql_query_api_etl_rule_perms": ("apiEtlRule", "query"),
+    # Dormant right: declared but read nowhere. The mutation that executes a pipeline
+    # checks the read right (953001) today and not this one. The separation is laid
+    # down here; fixing the call site is another batch of work.
+    "gql_mutation_execute_api_etl_rule_perms": ("apiEtlRule", "execute"),
+}
+
+RIGHTS = RightsDeclaration(MODULE_NAME, DJANGO_PERMS, _PERM_CFG)
+
+perms = RIGHTS.perms
+django_perms = RIGHTS.django_perm_names
+configured_perms = RIGHTS.configured
+require = RIGHTS.require
+
 
 DEFAULT_CONFIG = {
     "auth_type": "basic",  # noauth, basic, bearer
@@ -22,8 +52,6 @@ DEFAULT_CONFIG = {
     "sink_model_lookup_field": "json_ext__external_id",
     "sink_update_existing": True,
 
-    "gql_query_api_etl_rule_perms": ["953001"],
-    "gql_mutation_execute_api_etl_rule_perms": ["953002"],
 }
 
 
@@ -50,8 +78,11 @@ class ApiEtlConfig(AppConfig):
     sink_model_lookup_field = None
     sink_update_existing = None
 
-    gql_query_api_etl_rule_perms = None
-    gql_mutation_execute_api_etl_rule_perms = None
+    # Rights: constants, no longer overridable. They go neither through DEFAULT_CFG
+    # nor through ready(): `ModuleConfiguration.get_or_default` now ignores any
+    # `_perms` key stored in the database.
+    gql_query_api_etl_rule_perms = RIGHTS.perms("apiEtlRule", "query")
+    gql_mutation_execute_api_etl_rule_perms = RIGHTS.perms("apiEtlRule", "execute")
 
     @classmethod
     def _load_config(cls, cfg):
